@@ -9,11 +9,22 @@ function gravity
   for j=1:n
     t(j)=(j-1)/(n-1);    
   end
+  %exact solution
+  for j=1:n
+    f(j)=sin(pi*t(j)) + 0.5*sin(2*pi*t(j));
+  end
+    
   for i=1:m
-    for j=1:n
-      K(i,j)=d/(( d^2 + (s(i)-t(j))^2 )^(3/2));  
+    K(i,1)= 1/2*(n-1) * (d/(( d^2 + (s(i)-t(1))^2 )^(3/2)));
+    K(i,n)= 1/2*(n-1) * (d/(( d^2 + (s(i)-t(n))^2 )^(3/2)));
+  end
+  
+  for i=1:m
+    for j=2:(n-1)
+      K(i,j)=1/2*(n-1) * 2 * (d/(( d^2 + (s(i)-t(j))^2 )^(3/2)));
     end
   end
+      
   [U,S,V]=svd(K);
   sigma=diag(S);
   
@@ -21,14 +32,11 @@ function gravity
   int=1:15;
   plot(int,sigma,'-o')
   ylabel('Singular values of K')
-  axis([1 15])
+  %axis([1 15])
   
-  %exact solution
-  for j=1:n
-    f(j)=sin(pi*t(j)) + 0.5*sin(2*pi*t(j));
-  end
   
-  b=g-ksi;
+  
+  b=g-ksi';
   
   figure(2)
   % solution x=V(:,1:r)*inv(S(1:r,1:r))*U(:,1:r)'*b
@@ -36,7 +44,7 @@ function gravity
     x=V(:,1:p)*inv(S(1:p,1:p))*U(:,1:p)'*b;
     plot(int,x,int,f)
     legend('approx','exact')
-    axis([1 15 -6 6])
+    axis([1 15 -1.4 1.4])
     title(sprintf('rank %d',p))
     pause(0.2)
   end
