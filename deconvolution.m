@@ -2,34 +2,30 @@ function deconvolution
   load('model_dekonvolucija_uy.mat') %input
   load('model_dekonvolucija_hh.mat') %exact solution
     
-  m=102; n=18;
+  m=103; n=19;
   
-  for j = 1:m+1
-    U(j,:) = up(:,n+j:-1:j);   % matrica U dimenzije 103x19
+  for j=1:m
+    U(j,:)=up(:,n+j-1:-1:j);   % UR{103x19}
   end
 
-  Y = yp;     % matrica Y dimenzije 103x1;     sustav je Y = UH
+  Y = yp;      
   C = [U Y];
-  s1 = svd(U);
-  s2 = svd(C);
-  if s1(19) > s2(20)
+  s1 = svd(U); [s1m,s1n]=size(s1);
+  s2 = svd(C); [s2m,s2n]=size(s2);
+  if s1(s1m) > s2(s2m)
     [P,S,R]=svd(C,0);
-    P2 = P(:,20);
-    S2 = S(20,20);
-    R_12 = R(1:19,20);
-    R_22 = R(20,20);
-    Z = [R_12' R_22'];
-    RJ = -P2*S2*Z;
-    E0 = RJ(:,1:19);
-    R0 = RJ(:,20);
+    P2 = P(:,s2m);
+    S2 = S(s2m,s2m);
+    R12 = R(1:s1m,s2m);
+    R22 = R(s2m,s2m);
+    Q = [R12' R22'];
+    E0R0 = -P2*S2*Q;
+    E0 = E0R0(:,1:s1m);
+    R0 = E0R0(:,s2m);
     X = (U+E0)\(Y+R0);
-    
   end
 
-  plot(hh,'r');
-  hold on;
-  plot(X,'g');
-  legend('egzaktnoRJ','izracunatoRJ');
-  hold off;
-
+  plot(1:s1m,hh,'b',1:s1m,X,'r');
+  legend('exact solution','computed solution');  
+  axis([1 19 -1 1])
 end
